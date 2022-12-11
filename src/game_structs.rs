@@ -75,6 +75,7 @@
         let mut check_cell: bool = false;
         let mut valid_move: bool = false;
 // TODO : Add case where full row is full but there is adjacent (n+1) same number
+// It seems to work in some dirs (down, right) but not others......
         match move_dir {
             
             Direction::Up => {
@@ -106,9 +107,9 @@
                 }
             },
             Direction::Left => {
-                for r in 0..4 {
+                for r in 0..=3 {
                   check_cell = false;
-                  for c in (0..4).rev() {
+                  for c in (0..=3).rev() {
                     if state.current.0[r].0[c]!=0 {
                       check_cell = true;
                     } else {
@@ -144,6 +145,7 @@
         frame.0[merge_cell.y].0[merge_cell.x] = 0;
         frame
     }
+    
     pub fn process_move(move_dir: Direction, state: GameState) -> GameState {
         let mut check_value: u32 = 0;
         let mut cur_state = state;
