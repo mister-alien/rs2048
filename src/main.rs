@@ -15,7 +15,7 @@ fn main() {
 
     println!("Is Up a valid move? {}\nIs Down a valid move? {}\nIs Left a valid move? {}\nIs Right a valid move? {}\n", 
     upres,downres,leftres,rightres);
-
+/* 
     x = game_structs::process_move(game_structs::Direction::Up, x);
     println!("{}", x);
     x = game_structs::process_move(game_structs::Direction::Down, x);
@@ -23,6 +23,7 @@ fn main() {
     x = game_structs::process_move(game_structs::Direction::Left, x);
     println!("{}", x);
     x = game_structs::process_move(game_structs::Direction::Right, x);
+    */
     let term = Term::stdout();
 
 
