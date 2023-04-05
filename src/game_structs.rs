@@ -30,6 +30,57 @@
             itertools::Either::Right((0..size).rev())
         }
     }
+    pub fn merge_adjacent(dir:Direction, state: GameState) -> GameState {
+        let mut valid_merge: bool = false;
+        let mut merge_val: u32 = 0;
+        let mut merge_spot: usize = 0;
+        let mut cur_state: GameState = state;
+        let mut check_value: u32 = 0;
+        let mut merge_col: usize = 0;
+        let mut merge_row: usize = 0;
+
+        let mut c: usize = 0;
+        let mut r: usize = 0;
+
+        let rev: bool = dir == Direction::Right || dir == Direction::Down;
+        for outer in create_range(rev, 4) {
+            valid_merge = false;
+
+            merge_val = 0;
+            merge_col = 0;
+            merge_row = 0;
+
+            for inner in create_range(rev, 4) {
+                if dir == Direction::Right || dir == Direction::Left {
+                    r = outer;
+                    c = inner;
+                }else{
+                    r = inner;
+                    c = outer;
+                }
+                check_value = cur_state.current.0[r].0[c];
+                if check_value == 0 {
+                    valid_merge = false;
+                } else if check_value > 0 && !valid_merge {
+                    merge_col = c;
+                    merge_row = r;
+                    merge_val = check_value;
+                    valid_merge = true;
+                } else if check_value >0 && valid_merge {
+                    if check_value != merge_val {
+                        merge_val = check_value;
+                        merge_row = r;
+                        merge_col = c;
+                    } else {
+                        cur_state.current = merge_squares(Coordinate{x:merge_col,y:merge_row}, Coordinate{x:c,y:r}, merge_val*2, cur_state.current);
+                        valid_merge = false;
+                    }
+                }
+
+            }
+        }
+        cur_state
+    }
     pub fn move_squares(dir: Direction, state: GameState) -> GameState {
         let mut nonzero_val: u32 = 0;
         let mut open_spot_flag: bool = false;
@@ -40,39 +91,32 @@
         let mut r: usize=0;
         let rev: bool = dir == Direction::Right || dir == Direction::Down;
         for outer in create_range(false, 4) {
-            //check_cell = false;
+            open_spot_flag = false;
             for inner in create_range(rev, 4) {
-                open_spot_flag = false;
-                if dir == Direction::Up || dir == Direction::Left {
+                
+                if dir == Direction::Right || dir == Direction::Left {
                     r = outer;
                     c = inner;
                 }else{
                     r = inner;
                     c = outer;
                 }
-                    if cur_state.current.0[r].0[c] == 0 {
-                        if !open_spot_flag {
-                            open_spot_flag = true;
-                            open_row = r;
-                            open_col = c;
-                        }
-                    } else if open_spot_flag {
-                        cur_state.current=merge_squares(Coordinate{x:open_col,y:open_row}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
+                if cur_state.current.0[r].0[c] == 0 {
+                    if !open_spot_flag {
                         open_spot_flag = true;
-                        match dir {
-            
-                            Direction::Up => { open_row +=1; },
-                            Direction::Down => {open_row -=1; },
-                            Direction::Left => { open_col +=1},
-                            Direction::Right => { open_col -=1},
-                            _ => {
-                                println!("Woah there pal");
-                            }
-
-                        }
-                    } else {
-                        
+                        open_row = r;
+                        open_col = c;
                     }
+                } else if open_spot_flag {
+                    cur_state.current=merge_squares(Coordinate{x:open_col,y:open_row}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
+                    open_spot_flag = true;
+                    match dir {
+                        Direction::Up => { open_row = open_row+1; },
+                        Direction::Down => {open_row =open_row-1; },
+                        Direction::Left => { open_col =open_col+1; },
+                        Direction::Right => { open_col =open_col-1; },
+                    }
+                } 
             }
           }
           cur_state
@@ -239,257 +283,14 @@
         if !check_valid(move_dir, &cur_state) {
             return cur_state;
         }
-        //let mut merge_coord: Coordinate = Coordinate{x: 0, y:0};
-        match move_dir {
-            
-        Direction::Up => {
-            for c in 0..=3 {
-                open_spot_flag = false;
-                //move step
-                for r in 0..=3 {
-                    if cur_state.current.0[r].0[c] == 0 {
-                        if !open_spot_flag {
-                            open_spot_flag = true;
-                            open_spot = r;
-                        }
-                    } else if open_spot_flag {
-                        cur_state.current=merge_squares(Coordinate{x:c,y:open_spot}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                        open_spot_flag = true;
-                        open_spot = open_spot+1;
-                    } else {
-                        
-                    }
-                }
-                valid_merge = false;
-                merge_val = 0;
-                merge_spot = 0;
-                //merge step
-                for r in 0..=3 {
-                    check_value = cur_state.current.0[r].0[c];
-                    if check_value ==0 {
-                        valid_merge = false;
-                    } else if check_value >0 && !valid_merge {
-                        merge_spot = r;
-                        merge_val = check_value;
-                        valid_merge = true;
-                    } else if check_value >0 && valid_merge  {
-                        if check_value == merge_val {
-                            cur_state.current=merge_squares(Coordinate{x:c,y:merge_spot}, Coordinate{x:c,y:r}, merge_val*2, cur_state.current);
-                            valid_merge = false;
-                        } else {
-                            merge_val = check_value;
-                            merge_spot = r;
-                        }
-
-                    }
-                }
-                //move step 2
-                open_spot_flag = false;
-                //move step
-                for r in 0..=3 {
-                    if cur_state.current.0[r].0[c] == 0 {
-                        if !open_spot_flag {
-                            open_spot_flag = true;
-                            open_spot = r;
-                        }
-                    } else if open_spot_flag {
-                        cur_state.current=merge_squares(Coordinate{x:c,y:open_spot}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                        open_spot_flag = true;
-                        open_spot = open_spot+1;
-                    } else {
-                        
-                    }
-                }
-            }
-            cur_state.current= gen_square(cur_state.current,1);
-            cur_state.moves+=1;
-        },
-            Direction::Left => {
-                for r in 0..=3 {
-                    open_spot_flag = false;
-                    //move step
-                    for c in 0..=3 {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = c;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:open_spot,y:r}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot+1;
-                        } else {
-                            
-                        }
-                    }
-                    valid_merge = false;
-                    merge_val = 0;
-                    merge_spot = 0;
-                    //merge step
-                    for c in 0..=3 {
-                        check_value = cur_state.current.0[r].0[c];
-                        if check_value ==0 {
-                            valid_merge = false;
-                        } else if check_value >0 && !valid_merge {
-                            merge_spot = c;
-                            merge_val = check_value;
-                            valid_merge = true;
-                        } else if check_value >0 && valid_merge  {
-                            if check_value == merge_val {
-                                cur_state.current=merge_squares(Coordinate{x:merge_spot,y:r}, Coordinate{x:c,y:r}, merge_val*2, cur_state.current);
-                                valid_merge = false;
-                            } else {
-                                merge_val = check_value;
-                                merge_spot = c;
-                            }
-    
-                        }
-                    }
-                    //move step 2
-                    open_spot_flag = false;
-                    //move step
-                    for c in 0..=3 {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = c;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:open_spot,y:r}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot+1;
-                        } else {
-                            
-                        }
-                    }
-                }
-                cur_state.current= gen_square(cur_state.current,1);
-                cur_state.moves+=1;},
-              Direction::Right => {
-                for r in 0..=3 {
-                    open_spot_flag = false;
-                    //move step
-                    for c in (0..=3).rev() {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = c;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:open_spot,y:r}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot-1;
-                        } else {
-                            
-                        }
-                    }
-                    valid_merge = false;
-                    merge_val = 0;
-                    merge_spot = 0;
-                    //merge step
-                    for c in (0..=3).rev() {
-                        check_value = cur_state.current.0[r].0[c];
-                        if check_value ==0 {
-                            valid_merge = false;
-                        } else if check_value >0 && !valid_merge {
-                            merge_spot = c;
-                            merge_val = check_value;
-                            valid_merge = true;
-                        } else if check_value >0 && valid_merge  {
-                            if check_value == merge_val {
-                                cur_state.current=merge_squares(Coordinate{x:merge_spot,y:r}, Coordinate{x:c,y:r}, merge_val*2, cur_state.current);
-                                valid_merge = false;
-                            } else {
-                                merge_val = check_value;
-                                merge_spot = c;
-                            }
-    
-                        }
-                    }
-                    //move step 2
-                    open_spot_flag = false;
-                    //move step
-                    for c in (0..=3).rev() {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = c;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:open_spot,y:r}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot-1;
-                        } else {
-                            
-                        }
-                    }
-                }
-                cur_state.current= gen_square(cur_state.current,1);
-                cur_state.moves+=1;},
-            Direction::Down => {
-                for c in 0..=3 {
-                    open_spot_flag = false;
-                    //move step
-                    for r in (0..=3).rev() {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = r;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:c,y:open_spot}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot-1;
-                        } else {
-                            
-                        }
-                    }
-                    valid_merge = false;
-                    merge_val = 0;
-                    merge_spot = 0;
-                    //merge step
-                    for r in (0..=3).rev() {
-                        check_value = cur_state.current.0[r].0[c];
-                        if check_value ==0 {
-                            valid_merge = false;
-                        } else if check_value >0 && !valid_merge {
-                            merge_spot = r;
-                            merge_val = check_value;
-                            valid_merge = true;
-                        } else if check_value >0 && valid_merge  {
-                            if check_value == merge_val {
-                                cur_state.current=merge_squares(Coordinate{x:c,y:merge_spot}, Coordinate{x:c,y:r}, merge_val*2, cur_state.current);
-                                valid_merge = false;
-                            } else {
-                                merge_val = check_value;
-                                merge_spot = r;
-                            }
-    
-                        }
-                    }
-                    //move step 2
-                    open_spot_flag = false;
-                    //move step
-                    for r in (0..=3).rev() {
-                        if cur_state.current.0[r].0[c] == 0 {
-                            if !open_spot_flag {
-                                open_spot_flag = true;
-                                open_spot = r;
-                            }
-                        } else if open_spot_flag {
-                            cur_state.current=merge_squares(Coordinate{x:c,y:open_spot}, Coordinate{x:c,y:r}, cur_state.current.0[r].0[c], cur_state.current);
-                            open_spot_flag = true;
-                            open_spot = open_spot-1;
-                        } else {
-                            
-                        }
-                    }
-                }
-                cur_state.current= gen_square(cur_state.current,1);
-                cur_state.moves+=1;
-                },
-            _ => println!("Direction was wrong!"),
-        }
+        //move step 1
+        cur_state = move_squares(move_dir, cur_state);
+        //merge step
+        cur_state = merge_adjacent(move_dir, cur_state);
+        //move step 2
+        cur_state = move_squares(move_dir, cur_state);
+        cur_state.current= gen_square(cur_state.current,1);
+        cur_state.moves+=1;
         cur_state
     } 
     impl fmt::Display for Row {
