@@ -175,89 +175,40 @@
 
     pub fn check_valid(move_dir: Direction, state: &GameState)->bool{
         let mut nonzero_val: u32 = 0;
+        let mut check_value: u32 = 0;
+        let mut merge_col: usize = 0;
+        let mut merge_row: usize = 0;
+        
+        let mut c: usize = 0;
+        let mut r: usize = 0;
+
+        let rev: bool = move_dir == Direction::Left || move_dir == Direction::Up;
+
         //let mut check_cell: bool = false;
         //let mut valid_move: bool = false;
-// TODO : Added case where adjacent numbers are same.
-        match move_dir {
-            
-            Direction::Up => {
-                for c in 0..=3 {
-                  nonzero_val = 0;
-                  //check_cell = false;
-                  for r in (0..=3).rev() {
-                    if state.current.0[r].0[c]!=0 {
-                      if nonzero_val == 0 || nonzero_val != state.current.0[r].0[c] {
-                        nonzero_val = state.current.0[r].0[c];
-                      }else if state.current.0[r].0[c] == nonzero_val{
-                        return true;
-                      } else {
-                        
-                      }
-                    } else if nonzero_val != 0 {
-                        return true;
-                    }
-                  }
+        // TODO : Added case where adjacent numbers are same.
+        for outer in create_range(rev, 4) {
+            nonzero_val = 0;
+            for inner in create_range(rev, 4) {
+                if move_dir == Direction::Right || move_dir == Direction::Left {
+                    r = outer;
+                    c = inner;
+                }else{
+                    r = inner;
+                    c = outer;
                 }
-            },
-            Direction::Down => {
-                for c in 0..=3 {
-                    nonzero_val = 0;
-                    //check_cell = false;
-                    for r in 0..=3 {
-                      if state.current.0[r].0[c]!=0 {
-                        if nonzero_val == 0 || nonzero_val != state.current.0[r].0[c] {
-                          nonzero_val = state.current.0[r].0[c];
-                        }else if state.current.0[r].0[c] == nonzero_val{
-                          return true;
-                        } else {
-                          
-                        }
-                      } else if nonzero_val != 0 {
-                          return true;
-                      }
-                    }
-                  }
-            },
-            Direction::Left => {
-                for r in 0..=3 {
-                    nonzero_val = 0;
-                    //check_cell = false;
-                    for c in (0..=3).rev() {
-                      if state.current.0[r].0[c]!=0 {
-                        if nonzero_val == 0 || nonzero_val != state.current.0[r].0[c] {
-                          nonzero_val = state.current.0[r].0[c];
-                        }else if state.current.0[r].0[c] == nonzero_val{
-                          return true;
-                        } else {
-                          
-                        }
-                      } else if nonzero_val != 0 {
-                          return true;
-                      }
-                    }
-                  }
-            },
-            Direction::Right => {
-                for r in 0..=3 {
-                    nonzero_val = 0;
-                    //check_cell = false;
-                    for c in 0..=3 {
-                      if state.current.0[r].0[c]!=0 {
-                        if nonzero_val == 0 || nonzero_val != state.current.0[r].0[c] {
-                          nonzero_val = state.current.0[r].0[c];
-                        }else if state.current.0[r].0[c] == nonzero_val{
-                          return true;
-                        } else {
-                          
-                        }
-                      } else if nonzero_val != 0 {
-                          return true;
-                      }
-                    }
-                  }
-            },
-            //_ => println!("Invalid Move"),
+                check_value = state.current.0[r].0[c];
+                if check_value != 0 {
+                    if nonzero_val == 0 || nonzero_val != check_value {
+                        nonzero_val = check_value;
+                    } else if check_value == nonzero_val {
+                        return true;
+                    } 
+                } else if nonzero_val != 0 {
+                    return true;
+                }
 
+            }
         }
         false
     }
@@ -269,17 +220,9 @@
     }
     
     pub fn process_move(move_dir: Direction, state: GameState) -> GameState {
-        let mut check_value: u32 = 0;
-        let mut open_spot: usize = 0;
-        let mut open_spot_flag: bool = false;
+        
         let mut cur_state = state;
-        let mut merge_val: u32 = 0;
-        let mut merge_spot: usize = 0;
-        //let cur_dir: Direction = move_dir;
-        let mut changed: bool = false;
-        let mut valid_merge: bool = true;
-        let mut valid_move: bool = false;
-        let mut move_to: usize = 0;
+        
         if !check_valid(move_dir, &cur_state) {
             return cur_state;
         }
