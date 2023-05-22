@@ -1,7 +1,6 @@
 // import fmt to make available
     use std::fmt;
     use rand::Rng;
-    use itertools::Itertools;
     //use to make selectable iterators.
     // All possible game moves :)
     #[derive(Copy, Clone, PartialEq)]
@@ -31,21 +30,19 @@
         }
     }
     pub fn merge_adjacent(dir:Direction, state: GameState) -> GameState {
-        let mut valid_merge: bool = false;
-        let mut merge_val: u32 = 0;
-        let mut merge_spot: usize = 0;
+        let mut valid_merge: bool;
+        let mut merge_val: u32;
         let mut cur_state: GameState = state;
-        let mut check_value: u32 = 0;
-        let mut merge_col: usize = 0;
-        let mut merge_row: usize = 0;
+        let mut check_value: u32;
+        let mut merge_col: usize;
+        let mut merge_row: usize;
 
-        let mut c: usize = 0;
-        let mut r: usize = 0;
+        let mut c: usize;
+        let mut r: usize;
 
         let rev: bool = dir == Direction::Right || dir == Direction::Down;
         for outer in create_range(rev, 4) {
             valid_merge = false;
-
             merge_val = 0;
             merge_col = 0;
             merge_row = 0;
@@ -82,13 +79,12 @@
         cur_state
     }
     pub fn move_squares(dir: Direction, state: GameState) -> GameState {
-        let mut nonzero_val: u32 = 0;
-        let mut open_spot_flag: bool = false;
+        let mut open_spot_flag: bool;
         let mut cur_state = state;
         let mut open_col: usize = 0;
         let mut open_row: usize = 0;
-        let mut c: usize=0;
-        let mut r: usize=0;
+        let mut c: usize;
+        let mut r: usize;
         let rev: bool = dir == Direction::Right || dir == Direction::Down;
         for outer in create_range(false, 4) {
             open_spot_flag = false;
@@ -174,13 +170,10 @@
     }
 
     pub fn check_valid(move_dir: Direction, state: &GameState)->bool{
-        let mut nonzero_val: u32 = 0;
-        let mut check_value: u32 = 0;
-        let mut merge_col: usize = 0;
-        let mut merge_row: usize = 0;
-        
-        let mut c: usize = 0;
-        let mut r: usize = 0;
+        let mut nonzero_val: u32;
+        let mut check_value: u32;
+        let mut c: usize;
+        let mut r: usize;
 
         let rev: bool = move_dir == Direction::Left || move_dir == Direction::Up;
 
