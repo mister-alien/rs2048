@@ -3,7 +3,8 @@
 Features:
  * Interactive / TUI interface for 2048
  * Game logic largely works.
- * Fun Merge/Validation Checking code
+ * Fun Merge/Validation Checking code. 
+ 
 TODO:
  * Make game menu / restart UI
  * make TUI spacing prettier / consistent. (learn string formatting loesr)
