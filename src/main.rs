@@ -52,7 +52,10 @@ fn main() {
 
             }
         }
-        term.clear_screen();
+        match term.clear_screen() {
+            Ok(_)=>(),
+            Err(e) => panic!("{:?}", e)
+        };
         println!("{}", x);
         thread::sleep(time::Duration::from_millis(100));
     }
