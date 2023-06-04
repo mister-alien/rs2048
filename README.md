@@ -1,9 +1,10 @@
 # rs2048 - 2048 clone in rust
-    This is a dumb coding challenge for me to exercise doing rust things in.
+This is a dumb coding challenge for me to exercise doing rust things in.  
 Features:
  * Interactive / TUI interface for 2048
  * Game logic largely works.
  * Fun Merge/Validation Checking code. 
+ * Uh, a tests module?
  
 TODO:
  * Make game menu / restart UI
@@ -15,6 +16,8 @@ TODO:
  * leaderboard --> global leaderboard on my servers(?)
  * timer? 
  * variable size play board (basically replace 4  everywhere with a variable lol)
+ * increase testing coverage
+ * (integration testing?)
 ## Building
 Just run
 `
@@ -23,3 +26,8 @@ cargo build
 
 and it should work.
 Currently if you run, you just get tossed into a game.
+## Testing
+Just run
+```bash
+cargo test
+```
