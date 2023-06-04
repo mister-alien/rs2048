@@ -1,29 +1,30 @@
-mod game_structs;
-mod tests;
+mod game_logic;
+//mod tests;
 use std::{thread, time};
-
+use game_logic::logic::*;
+use game_logic::structs::*;
 use console::Term;
 
 fn main() {
 
-    let mut x: game_structs::GameState = 
-    game_structs::new_game(game_structs::init_state());
+    let mut x: GameState = 
+    new_game(init_state());
     println!("{}", x);
-    let upres: bool =game_structs::check_valid(game_structs::Direction::Up, &x);
-    let downres: bool =game_structs::check_valid(game_structs::Direction::Down, &x);
-    let leftres: bool =game_structs::check_valid(game_structs::Direction::Left, &x);
-    let rightres: bool =game_structs::check_valid(game_structs::Direction::Right, &x);
+    let upres: bool =check_valid(Direction::Up, &x);
+    let downres: bool =check_valid(Direction::Down, &x);
+    let leftres: bool =check_valid(Direction::Left, &x);
+    let rightres: bool =check_valid(Direction::Right, &x);
 
     println!("Is Up a valid move? {}\nIs Down a valid move? {}\nIs Left a valid move? {}\nIs Right a valid move? {}\n", 
     upres,downres,leftres,rightres);
 /* 
-    x = game_structs::process_move(game_structs::Direction::Up, x);
+    x = game_logic::process_move(game_logic::Direction::Up, x);
     println!("{}", x);
-    x = game_structs::process_move(game_structs::Direction::Down, x);
+    x = game_logic::process_move(game_logic::Direction::Down, x);
     println!("{}", x);
-    x = game_structs::process_move(game_structs::Direction::Left, x);
+    x = game_logic::process_move(game_logic::Direction::Left, x);
     println!("{}", x);
-    x = game_structs::process_move(game_structs::Direction::Right, x);
+    x = game_logic::process_move(game_logic::Direction::Right, x);
     */
     let term = Term::stdout();
 
@@ -36,16 +37,16 @@ fn main() {
         };
         match keydown {
             console::Key::ArrowUp => {
-                x = game_structs::process_move(game_structs::Direction::Up, x);
+                x = process_move(Direction::Up, x);
             },
             console::Key::ArrowDown => {
-                x = game_structs::process_move(game_structs::Direction::Down, x);
+                x = process_move(Direction::Down, x);
             },
             console::Key::ArrowLeft => {
-                x = game_structs::process_move(game_structs::Direction::Left, x);
+                x = process_move(Direction::Left, x);
             },
             console::Key::ArrowRight => {
-                x = game_structs::process_move(game_structs::Direction::Right, x);
+                x = process_move(Direction::Right, x);
             },
             _ => {
 

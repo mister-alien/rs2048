@@ -2,21 +2,24 @@
 // https://doc.rust-lang.org/rust-by-example/testing/unit_testing.html
 
 
-#[cfg(test)]   
+
 // use std::default;
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
  
-    use super::*;
-    use crate::game_structs::create_range;
-    use crate::game_structs::*;
-    use itertools::Either;
+    //use super::*;
+    //#[cfg(test)]   
+    //use itertools::Either;
+    #[cfg(test)]   
+    use super::structs::{Direction,Row,GameFrame,GameState};
+    #[cfg(test)]   
+    use super::logic::{create_range,move_squares,check_valid};
     //Game_structs section -- utility function testing
     #[test]
     fn test_rangecreate() -> Result<(), String> {
         let size: usize = 4;
 
-        let zz:Either<std::ops::Range<usize>, std::ops::Range<usize>> = Either::Left(0..size);
+        let zz:itertools::Either<std::ops::Range<usize>, std::ops::Range<usize>> = itertools::Either::Left(0..size);
         
         let iter4 = match create_range(false,size) {
             Ok(res) => res,
@@ -29,7 +32,7 @@
     fn test_rangecreate_rev() -> Result<(), String> {
         let size: usize = 4;
 
-        let zz:Either<std::ops::Range<usize>, std::iter::Rev<std::ops::Range<usize>>> = Either::Right((0..size).rev());
+        let zz:itertools::Either<std::ops::Range<usize>, std::iter::Rev<std::ops::Range<usize>>> = itertools::Either::Right((0..size).rev());
         
         let iter4 = match create_range(true,size) {
             Ok(res) => res,
