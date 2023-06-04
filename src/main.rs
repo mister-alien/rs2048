@@ -1,4 +1,5 @@
 mod game_structs;
+mod tests;
 use std::{thread, time};
 
 use console::Term;

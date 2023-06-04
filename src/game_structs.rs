@@ -1,6 +1,7 @@
 // import fmt to make available
     use std::fmt;
     use rand::Rng;
+    use itertools::Either;
     //use to make selectable iterators.
     // All possible game moves :)
     #[derive(Copy, Clone, PartialEq)]
@@ -13,20 +14,81 @@
  
     // Individual coordinate structure.. maybe for later?
     struct Coordinate {x: usize, y: usize }
-    pub struct Row([u32; 4]);
-    pub struct GameFrame([Row; 4]);
+    impl Default for Coordinate {
+        fn default() -> Coordinate {
+            Coordinate { x: 0, y: 0 }
+        }
+    }
+    #[derive(Debug)]
+    pub struct Row(pub [u32; 4]);
+    impl Default for Row {
+        fn default() -> Row {
+            Row([0,0,0,0])
+        }
+    }
+    impl PartialEq for Row {
+        fn eq(&self, other: &Self) -> bool {
+            (self.0[0] == other.0[0]) && (self.0[1] ==other.0[1]) && 
+            (self.0[2] == other.0[2]) && (self.0[3] == other.0[3])
+        }
+    }
+    impl fmt::Display for Row {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f,"[{},{},{},{}]", self.0[0],self.0[1],self.0[2],self.0[3])
+        }
+    }
+    #[derive(Debug)]
+    pub struct GameFrame(pub [Row; 4]);
+    impl Default for GameFrame {
+        fn default() -> GameFrame {
+            GameFrame([Row(Default::default()),
+                    Row(Default::default()),
+                    Row(Default::default()),
+                    Row(Default::default())])
+        }
+    }
+    impl PartialEq for GameFrame {
+        fn eq(&self, other: &Self) -> bool {
+            (self.0[0] == other.0[0]) && (self.0[1] ==other.0[1]) && 
+            (self.0[2] == other.0[2]) && (self.0[3] == other.0[3])
+        }
+    }
+    impl fmt::Display for GameFrame {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f,"{}\n{}\n{}\n{}", 
+                self.0[0],
+                self.0[1],
+                self.0[2],
+                self.0[3])
+        }
+    }
     pub struct GameState {
         pub current: GameFrame,
-        prev: GameFrame,
-        moves: u32,
+        pub prev: GameFrame,
+        pub moves: u32,
     }
+    impl Default for GameState {
+        fn default() -> GameState {
+            GameState { current: init_state(), 
+                prev: GameFrame(Default::default()), 
+                moves: 0 }
+        }
+    }
+    impl fmt::Display for GameState {
+
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f,"Move: {}\n{}", self.moves, 
+                self.current)
+        }
+    }
+
     // CREATES range UNTIL size (range of size "size" )
     pub fn create_range(
-        rev: bool,  size: usize) -> itertools::Either<impl Iterator<Item = usize>, impl Iterator<Item = usize>> {
-        if !rev {
-            itertools::Either::Left(0..size)
+        rev: bool,  size: usize) -> Result<itertools::Either<impl Iterator<Item = usize>, impl Iterator<Item = usize>>, String> {
+         if !rev {
+            Ok(itertools::Either::Left(0..size))
         } else {
-            itertools::Either::Right((0..size).rev())
+            Ok(itertools::Either::Right((0..size).rev()))
         }
     }
     pub fn merge_adjacent(dir:Direction, state: GameState) -> GameState {
@@ -41,13 +103,21 @@
         let mut r: usize;
 
         let rev: bool = dir == Direction::Right || dir == Direction::Down;
-        for outer in create_range(rev, 4) {
+        let outer_loop_range = match create_range(false, 4) {
+            Ok(range) => range,
+            Err(error) => panic!("Problem Creating Range, {:?}", error),
+        };
+        for outer in outer_loop_range {
+            
             valid_merge = false;
             merge_val = 0;
             merge_col = 0;
             merge_row = 0;
-
-            for inner in create_range(rev, 4) {
+            let inner_loop_range = match create_range(rev, 4) {
+                Ok(range) => range,
+                Err(error) => panic!("Problem Creating Range, {:?}", error),
+            };
+            for inner in inner_loop_range {
                 if dir == Direction::Right || dir == Direction::Left {
                     r = outer;
                     c = inner;
@@ -86,9 +156,21 @@
         let mut c: usize;
         let mut r: usize;
         let rev: bool = dir == Direction::Right || dir == Direction::Down;
-        for outer in create_range(false, 4) {
+
+        // we're introducing result enums because (shrug)
+        let outer_loop_range = match create_range(false, 4) {
+            Ok(range) => range,
+            Err(error) => panic!("Problem Creating Range, {:?}", error),
+        };
+
+
+        for outer in outer_loop_range {
             open_spot_flag = false;
-            for inner in create_range(rev, 4) {
+            let inner_loop_range = match create_range(rev, 4) {
+                Ok(range) => range,
+                Err(error) => panic!("Problem Creating Range, {:?}", error),
+            };
+            for inner in inner_loop_range {
                 
                 if dir == Direction::Right || dir == Direction::Left {
                     r = outer;
@@ -118,11 +200,7 @@
           cur_state
     }
     pub fn init_state() -> GameFrame {
-        let mut frame: GameFrame = GameFrame(
-            [Row([0,0,0,0]),
-            Row([0,0,0,0]),
-            Row([0,0,0,0]),
-            Row([0,0,0,0])]);
+        let mut frame: GameFrame = GameFrame(Default::default());
         let mut rng = rand::thread_rng();
         let mut coord:Coordinate = Coordinate{
             x: 0,
@@ -142,10 +220,7 @@
     fn gen_square(cur_frame: GameFrame, count: u8) -> GameFrame {
         let mut frame = cur_frame;
         let mut rng = rand::thread_rng();
-        let mut coord:Coordinate = Coordinate{
-            x: 0,
-            y:0
-        };
+        let mut coord:Coordinate = Coordinate{..Default::default()};
         for _b in 0 ..count {
             coord.x = rng.gen_range(0..=3);
             coord.y = rng.gen_range(0..=3);
@@ -160,11 +235,7 @@
     pub fn new_game(init_state: GameFrame) -> GameState {
         GameState {
             current: init_state,
-            prev: GameFrame([Row([0,0,0,0]),
-            Row([0,0,0,0]),
-            Row([0,0,0,0]),
-            Row([0,0,0,0]),
-            ]),
+            prev: GameFrame(Default::default()),
             moves: 0
         }
     }
@@ -176,13 +247,18 @@
         let mut r: usize;
 
         let rev: bool = move_dir == Direction::Left || move_dir == Direction::Up;
-
-        //let mut check_cell: bool = false;
-        //let mut valid_move: bool = false;
+        let outer_loop_range = match create_range(false, 4) {
+            Ok(range) => range,
+            Err(error) => panic!("Problem Creating Range, {:?}", error),
+        };
         // TODO : Added case where adjacent numbers are same.
-        for outer in create_range(rev, 4) {
+        for outer in outer_loop_range {
             nonzero_val = 0;
-            for inner in create_range(rev, 4) {
+            let inner_loop_range = match create_range(rev, 4) {
+                Ok(range) => range,
+                Err(error) => panic!("Problem Creating Range, {:?}", error),
+            };
+            for inner in inner_loop_range {
                 if move_dir == Direction::Right || move_dir == Direction::Left {
                     r = outer;
                     c = inner;
@@ -229,24 +305,3 @@
         cur_state.moves+=1;
         cur_state
     } 
-    impl fmt::Display for Row {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"[{},{},{},{}]", self.0[0],self.0[1],self.0[2],self.0[3])
-        }
-    }
-    impl fmt::Display for GameFrame {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"{}\n{}\n{}\n{}", 
-                self.0[0],
-                self.0[1],
-                self.0[2],
-                self.0[3])
-        }
-    }
-    impl fmt::Display for GameState {
-
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"Move: {}\n{}", self.moves, 
-                self.current)
-        }
-    }
