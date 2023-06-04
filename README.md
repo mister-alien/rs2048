@@ -26,8 +26,3 @@ cargo build
 
 and it should work.
 Currently if you run, you just get tossed into a game.
-## Testing
-Just run
-```bash
-cargo test
-```
