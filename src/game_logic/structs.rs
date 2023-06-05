@@ -32,7 +32,8 @@
     }
     impl fmt::Display for Row {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"[{},{},{},{}]", self.0[0],self.0[1],self.0[2],self.0[3])
+            write!(f,"[{w:width$},{x:width$},{y:width$},{z:width$}]",
+            w=self.0[0],x=self.0[1],y=self.0[2],z=self.0[3],width=6)
         }
     }
     #[derive(Debug)]
