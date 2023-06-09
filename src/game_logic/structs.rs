@@ -54,7 +54,7 @@
     }
     impl fmt::Display for GameFrame {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"{}\n{}\n{}\n{}", 
+            write!(f,"{}\n\n{}\n\n{}\n\n{}", 
                 self.0[0],
                 self.0[1],
                 self.0[2],
